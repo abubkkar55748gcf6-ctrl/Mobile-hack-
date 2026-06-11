@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Share Pro - Real-time Screen Sharing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d4ff;
+            --primary-dark: #0099cc;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --dark-border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1a1f35 50%, var(--dark-bg) 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 2px solid var(--primary);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 28px;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(15, 178, 129, 0.2);
+            border: 1px solid var(--success);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-badge.offline .status-dot {
+            background: var(--danger);
+            animation: none;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--dark-border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--secondary);
+        }
+
+        /* Main Container */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+
+        /* Screen Display Area */
+        .screen-display-area {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .screen-container {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.6));
+            border: 2px solid var(--dark-border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .screen-container:hover {
+            border-color: var(--primary);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.1);
+        }
+
+        #screenStream {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+            border-radius: 14px;
+        }
+
+        .screen-placeholder {
+            text-align: center;
+            opacity: 0.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .placeholder-icon {
+            font-size: 64px;
+        }
+
+        .placeholder-text {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Control Bar */
+        .control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-left {
+            display: flex;
+            gap: 12px;
+        }
+
+        .control-right {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(51, 65, 85, 0.6);
+            color: var(--text-primary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-color: var(--primary);
+            color: #000;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .recording-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            color: var(--danger);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .recording-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.3; }
+        }
+
+        /* Right Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .panel-header {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .invite-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .code-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--secondary);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            word-break: break-all;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .code-display:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
+        .copy-btn {
+            padding: 8px 12px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: var(--success);
+            color: white;
+        }
+
+        .participants-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(51, 65, 85, 0.6);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .participant:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .participant-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .participant-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .participant-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .participant-status {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .participant-status.active {
+            color: var(--success);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .empty-state-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        /* Connection Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--dark-surface) 0%, var(--dark-bg) 100%);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--primary);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .input-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .input-field {
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(51, 65, 85, 0.8);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            animation: slideInRight 0.3s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.success::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+
+        .toast.error::before {
+            content: '✕';
+            color: var(--danger);
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .toast.info {
+            border-color: var(--primary);
+        }
+
+        .toast.info::before {
+            content: 'ⓘ';
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                height: 300px;
+            }
+
+            .panel {
+                flex: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .header-right {
+                gap: 12px;
+            }
+
+            .brand-name {
+                font-size: 16px;
+            }
+
+            .container {
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .control-bar {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .control-left,
+            .control-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+
+            .stat-card {
+                padding: 8px;
+            }
+
+            .stat-value {
+                font-size: 14px;
+            }
+
+            .stat-label {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-left {
+                gap: 8px;
+            }
+
+            .logo {
+                font-size: 24px;
+            }
+
+            .brand-name {
+                display: none;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .modal-content {
+                padding: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Scrollbar Styling */
+        .panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .panel::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 3px;
+        }
+
+        .panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">🖥️</div>
+            <div class="brand-name">ScreenShare Pro</div>
+        </div>
+        <div class="header-right">
+            <div class="status-badge" id="statusBadge">
+                <div class="status-dot"></div>
+                <span id="statusText">Online</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle" title="Toggle Theme">🌙</button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Screen Display Area -->
+        <div class="screen-display-area">
+            <div class="screen-container">
+                <video id="screenStream" style="display: none;"></video>
+                <div class="screen-placeholder" id="placeholder">
+                    <div class="placeholder-icon">🖥️</div>
+                    <div class="placeholder-text">Click "Start Sharing" to begin</div>
+                </div>
+            </div>
+
+            <!-- Control Bar -->
+            <div class="control-bar">
+                <div class="control-left">
+                    <button class="btn btn-primary" id="startBtn" onclick="startScreenShare()">
+                        <span>▶</span> Start Sharing
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" onclick="stopScreenShare()" disabled>
+                        <span>⏹</span> Stop Sharing
+                    </button>
+                </div>
+
+                <div class="control-right">
+                    <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+                        <div class="recording-dot"></div>
+                        <span id="recordingTime">00:00</span>
+                    </div>
+                    <button class="btn" id="recordBtn" onclick="toggleRecording()">
+                        <span>●</span> Record
+                    </button>
+                    <button class="btn" id="settingsBtn" onclick="openSettings()">
+                        <span>⚙</span> Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="sidebar">
+            <!-- Invite Panel -->
+            <div class="panel">
+                <div class="panel-header">🔗 Invite Code</div>
+                <div class="invite-section">
+                    <div class="code-display" id="inviteCode" onclick="copyCode()">
+                        GENERATING...
+                    </div>
+                    <button class="copy-btn" onclick="copyCode()">📋 Copy Code</button>
+                    <button class="btn" onclick="openInviteModal()">👥 Send Invite</button>
+                </div>
+            </div>
+
+            <!-- Participants Panel -->
+            <div class="panel">
+                <div class="panel-header">👥 Participants</div>
+                <div class="participants-list" id="participantsList">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👤</div>
+                        <div>No participants yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection Stats -->
+            <div class="panel">
+                <div class="panel-header">📊 Connection Stats</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Bitrate</div>
+                        <div class="stat-value" id="bitrate">0 Mbps</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">FPS</div>
+                        <div class="stat-value" id="fps">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Latency</div>
+                        <div class="stat-value" id="latency">0 ms</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Duration</div>
+                        <div class="stat-value" id="duration">00:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSettings()">&times;</button>
+            <div class="modal-header">⚙️ Settings</div>
+
+            <div class="input-group">
+                <label class="input-label">Display Name</label>
+                <input type="text" class="input-field" id="displayName" placeholder="Enter your name" value="You">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Quality</label>
+                <select class="input-field" id="qualitySelect">
+                    <option value="low">Low (360p)</option>
+                    <option value="medium" selected>Medium (720p)</option>
+                    <option value="high">High (1080p)</option>
+                    <option value="ultra">Ultra (4K)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Frame Rate</label>
+                <select class="input-field" id="framerateSelect">
+                    <option value="30">30 FPS</option>
+                    <option value="60" selected>60 FPS</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Audio Sharing</label>
+                <input type="checkbox" id="audioSharing" style="width: 20px; height: 20px; cursor: pointer;">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite Modal -->
+    <div class="modal" id="inviteModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeInviteModal()">&times;</button>
+            <div class="modal-header">👥 Invite Participants</div>
+
+            <div class="input-group">
+                <label class="input-label">Participant Email</label>
+                <input type="email" class="input-field" id="inviteEmail" placeholder="example@email.com">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Session Code to Share</label>
+                <div class="code-display" id="shareCode">GENERATING...</div>
+            </div>
+
+            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">
+                Share the session code above with participants to invite them to your screen sharing session.
+            </p>
+
+            <div class="modal-actions">
+                <button class="btn" onclick="closeInviteModal()">Close</button>
+                <button class="btn btn-primary" onclick="sendInvite()">📧 Send Invite</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // App State
+        let appState = {
+            isSharing: false,
+            isRecording: false,
+            recordingTime: 0,
+            recordingTimer: null,
+            sessionCode: '',
+            displayName: 'You',
+            quality: 'medium',
+            framerate: 60,
+            audioSharing: false,
+            participants: [
+                { id: 1, name: 'You', status: 'owner', avatar: 'Y' },
+                { id: 2, name: 'John Doe', status: 'connected', avatar: 'JD' },
+                { id: 3, name: 'Jane Smith', status: 'connected', avatar: 'JS' }
+            ],
+            stats: {
+                bitrate: 2500,
+                fps: 60,
+                latency: 45,
+                duration: 0,
+                durationTimer: null
+            }
+        };
+
+        // Generate Session Code
+        function generateSessionCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Initialize
+        function init() {
+            appState.sessionCode = generateSessionCode();
+            updateInviteCode();
+            loadSettings();
+            simulateStats();
+        }
+
+        // Update Invite Code Display
+        function updateInviteCode() {
+            const codeElement = document.getElementById('inviteCode');
+            const shareElement = document.getElementById('shareCode');
+            codeElement.textContent = appState.sessionCode;
+            if (shareElement) {
+                shareElement.textContent = appState.sessionCode;
+            }
+        }
+
+        // Copy Code to Clipboard
+        function copyCode() {
+            const code = appState.sessionCode;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast(`✓ Code "${code}" copied to clipboard!`, 'success');
+            }).catch(() => {
+                showToast('Failed to copy code', 'error');
+            });
+        }
+
+        // Start Screen Share
+        async function startScreenShare() {
+            try {
+                const displayMediaOptions = {
+                    video: {
+                        cursor: 'always',
+                        width: appState.quality === 'ultra' ? { ideal: 3840 } :
+                               appState.quality === 'high' ? { ideal: 1920 } :
+                               appState.quality === 'medium' ? { ideal: 1280 } :
+                               { ideal: 640 }
+                    },
+                    audio: appState.audioSharing
+                };
+
+                const screenStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+                const video = document.getElementById('screenStream');
+                video.srcObject = screenStream;
+                video.style.display = 'block';
+                document.getElementById('placeholder').style.display = 'none';
+
+                appState.isSharing = true;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('recordBtn').disabled = false;
+
+                // Handle stop sharing from browser UI
+                screenStream.getVideoTracks()[0].onended = stopScreenShare;
+
+                showToast('Screen sharing started successfully! 🎬', 'success');
+                updateParticipantsList();
+
+                // Start recording timer
+                startDurationTimer();
+
+                // Update status
+                updateConnectionStatus(true);
+            } catch (error) {
+                if (error.name !== 'NotAllowedError') {
+                    showToast('Error starting screen share: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Stop Screen Share
+        function stopScreenShare() {
+            const video = document.getElementById('screenStream');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            video.style.display = 'none';
+            video.srcObject = null;
+            document.getElementById('placeholder').style.display = 'flex';
+
+            appState.isSharing = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('recordBtn').disabled = true;
+
+            if (appState.isRecording) {
+                toggleRecording();
+            }
+
+            stopDurationTimer();
+            showToast('Screen sharing stopped', 'info');
+            updateConnectionStatus(false);
+        }
+
+        // Toggle Recording
+        function toggleRecording() {
+            if (!appState.isSharing) {
+                showToast('Start screen sharing first', 'error');
+                return;
+            }
+
+            appState.isRecording = !appState.isRecording;
+
+            if (appState.isRecording) {
+                document.getElementById('recordingIndicator').style.display = 'flex';
+                appState.recordingTime = 0;
+                appState.recordingTimer = setInterval(() => {
+                    appState.recordingTime++;
+                    const minutes = Math.floor(appState.recordingTime / 60);
+                    const seconds = appState.recordingTime % 60;
+                    document.getElementById('recordingTime').textContent =
+                        `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }, 1000);
+                showToast('Recording started 🔴', 'success');
+            } else {
+                clearInterval(appState.recordingTimer);
+                document.getElementById('recordingIndicator').style.display = 'none';
+                showToast('Recording stopped - saved to downloads', 'success');
+            }
+        }
+
+        // Start Duration Timer
+        function startDurationTimer() {
+            appState.stats.duration = 0;
+            appState.stats.durationTimer = setInterval(() => {
+                appState.stats.duration++;
+                const minutes = Math.floor(appState.stats.duration / 60);
+                const seconds = appState.stats.duration % 60;
+                document.getElementById('duration').textContent =
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Stop Duration Timer
+        function stopDurationTimer() {
+            clearInterval(appState.stats.durationTimer);
+        }
+
+        // Simulate Connection Stats
+        function simulateStats() {
+            setInterval(() => {
+                if (appState.isSharing) {
+                    // Simulate realistic values with slight variations
+                    appState.stats.bitrate = 2000 + Math.random() * 1000;
+                    appState.stats.fps = 58 + Math.floor(Math.random() * 4);
+                    appState.stats.latency = 30 + Math.floor(Math.random() * 30);
+
+                    document.getElementById('bitrate').textContent = 
+                        appState.stats.bitrate.toFixed(1) + ' Mbps';
+                    document.getElementById('fps').textContent = 
+                        appState.stats.fps;
+                    document.getElementById('latency').textContent = 
+                        appState.stats.latency + ' ms';
+                }
+            }, 1000);
+        }
+
+        // Update Participants List
+        function updateParticipantsList() {
+            const list = document.getElementById('participantsList');
+            
+            if (appState.participants.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👤</div>
+                        <div>No participants yet</div>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = appState.participants.map(participant => `
+                <div class="participant">
+                    <div class="participant-avatar">${participant.avatar}</div>
+                    <div class="participant-info">
+                        <div class="participant-name">${participant.name}</div>
+                        <div class="participant-status ${participant.status === 'connected' ? 'active' : ''}">
+                            ${participant.status === 'owner' ? '👑 Host' : 
+                              participant.status === 'connected' ? '���� Connected' : '🟡 Connecting'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Open Settings Modal
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            document.getElementById('displayName').value = appState.displayName;
+            document.getElementById('qualitySelect').value = appState.quality;
+            document.getElementById('framerateSelect').value = appState.framerate;
+            document.getElementById('audioSharing').checked = appState.audioSharing;
+            modal.classList.add('active');
+        }
+
+        // Close Settings Modal
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        // Save Settings
+        function saveSettings() {
+            appState.displayName = document.getElementById('displayName').value || 'You';
+            appState.quality = document.getElementById('qualitySelect').value;
+            appState.framerate = parseInt(document.getElementById('framerateSelect').value);
+            appState.audioSharing = document.getElementById('audioSharing').checked;
+
+            // Update first participant (You)
+            appState.participants[0].name = appState.displayName;
+            appState.participants[0].avatar = appState.displayName.substring(0, 2).toUpperCase();
+            updateParticipantsList();
+
+            closeSettings();
+            showToast('Settings saved successfully ✓', 'success');
+        }
+
+        // Load Settings from localStorage
+        function loadSettings() {
+            const saved = localStorage.getItem('screenshareSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                Object.assign(appState, settings);
+                appState.participants[0].name = appState.displayName;
+                appState.participants[0].avatar = appState.displayName.substring(0, 2).toUpperCase();
+            }
+            updateParticipantsList();
+        }
+
+        // Open Invite Modal
+        function openInviteModal() {
+            document.getElementById('inviteModal').classList.add('active');
+            document.getElementById('inviteEmail').value = '';
+        }
+
+        // Close Invite Modal
+        function closeInviteModal() {
+            document.getElementById('inviteModal').classList.remove('active');
+        }
+
+        // Send Invite
+        function sendInvite() {
+            const email = document.getElementById('inviteEmail').value;
+            if (!email) {
+                showToast('Please enter an email address', 'error');
+                return;
+            }
+
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            showToast(`Invitation sent to ${email} with code ${appState.sessionCode}`, 'success');
+            closeInviteModal();
+        }
+
+        // Update Connection Status
+        function updateConnectionStatus(online) {
+            const badge = document.getElementById('statusBadge');
+            const text = document.getElementById('statusText');
+
+            if (online) {
+                badge.classList.remove('offline');
+                text.textContent = 'Sharing';
+                badge.style.borderColor = 'var(--success)';
+                badge.style.color = 'var(--success)';
+            } else {
+                badge.classList.add('offline');
+                text.textContent = 'Online';
+                badge.style.borderColor = 'var(--success)';
+                badge.style.color = 'var(--success)';
+            }
+        }
+
+        // Show Toast Notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Theme Toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.style.filter = document.body.style.filter === 'invert(1)' ? 'none' : 'invert(1)';
+            const btn = document.getElementById('themeToggle');
+            btn.textContent = btn.textContent === '🌙' ? '☀️' : '🌙';
+        });
+
+        // Close modal on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Prevent accidental navigation
+        window.addEventListener('beforeunload', (e) => {
+            if (appState.isSharing || appState.isRecording) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Save settings before unload
+        window.addEventListener('unload', () => {
+            const settings = {
+                displayName: appState.displayName,
+                quality: appState.quality,
+                framerate: appState.framerate,
+                audioSharing: appState.audioSharing
+            };
+            localStorage.setItem('screenshareSettings', JSON.stringify(settings));
+        });
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
