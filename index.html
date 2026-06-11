@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Display - Full Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        
+        p {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .feature-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .feature-list ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .info-box {
+            background: #e8f5e9;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .time-display {
+            background: #667eea;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Screen Display</h1>
+        
+        <p>This is a full-screen display page that works perfectly on HTTPS servers without requiring any API keys or authentication.</p>
+        
+        <div class="feature-list">
+            <h2>Features:</h2>
+            <ul>
+                <li>Responsive Design - Works on all devices</li>
+                <li>No External Dependencies - Pure HTML/CSS/JS</li>
+                <li>HTTPS Compatible - Secure by default</li>
+                <li>No API Keys Required - Completely standalone</li>
+                <li>Fast Loading - Optimized performance</li>
+                <li>Modern UI - Beautiful gradient design</li>
+            </ul>
+        </div>
+        
+        <p>This page displays content directly on your screen with smooth animations and interactive elements. It requires no backend services, API keys, or external resources.</p>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="showAlert()">Click Me!</button>
+            <button class="btn-secondary" onclick="toggleInfo()">Show Info</button>
+        </div>
+        
+        <div class="info-box" id="infoBox" style="display: none;">
+            <strong>Information:</strong> This page is running on a secure HTTPS connection and all content is displayed locally in your browser.
+        </div>
+        
+        <div class="time-display" id="timeDisplay">
+            Loading time...
+        </div>
+    </div>
+    
+    <script>
+        // Update time display
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('timeDisplay').textContent = 'Current Time: ' + now.toLocaleTimeString();
+        }
+        
+        function showAlert() {
+            alert('Welcome! This page works without any API keys.');
+        }
+        
+        function toggleInfo() {
+            const infoBox = document.getElementById('infoBox');
+            infoBox.style.display = infoBox.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Update time on load and every second
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
