@@ -3,35 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Content Display</title>
+    <title>Advanced Numeric Display System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
+        :root {
+            --primary: #00d4ff;
+            --secondary: #0099cc;
+            --success: #00ff88;
+            --danger: #ff0055;
+            --warning: #ffaa00;
+            --dark: #0a0e27;
+            --light: #ecf0f1;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to right, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1e3f 50%, #0d1b2a 100%);
             min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 3px solid var(--primary);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+
+        .header-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .header-info {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .header-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.3; }
+        }
+
+        .main-container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .display-section {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 204, 0.1) 100%);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 15px;
-        }
-        
-        .screen {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            position: relative;
             overflow: hidden;
-            max-width: 900px;
-            width: 100%;
-            animation: fadeIn 0.8s ease-in;
+            animation: fadeIn 0.8s ease-out;
         }
-        
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -42,252 +109,488 @@
                 transform: scale(1);
             }
         }
-        
-        .screen-header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 25px;
-            text-align: center;
+
+        .display-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: scan-line 3s infinite;
+            pointer-events: none;
         }
-        
-        .screen-header h1 {
-            font-size: 2.2em;
-            margin-bottom: 10px;
+
+        @keyframes scan-line {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
-        
-        .screen-header p {
-            font-size: 0.95em;
-            opacity: 0.9;
-        }
-        
-        .screen-content {
-            padding: 30px;
-        }
-        
-        .section {
-            margin-bottom: 25px;
-        }
-        
-        .section h2 {
-            color: #1e3c72;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #2a5298;
-            padding-bottom: 10px;
-        }
-        
-        .card {
-            background: #f5f5f5;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid #2a5298;
-            transition: all 0.3s ease;
-        }
-        
-        .card:hover {
-            background: #e8f1f7;
-            transform: translateX(5px);
-        }
-        
-        .card h3 {
-            color: #1e3c72;
-            margin-bottom: 10px;
-        }
-        
-        .card p {
-            color: #555;
-            line-height: 1.6;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+
+        .display-label {
+            font-size: 1.2em;
+            color: var(--primary);
             margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 2;
         }
-        
-        .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stat-number {
-            font-size: 2em;
+
+        .main-display {
+            font-size: 6em;
             font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+            position: relative;
+            z-index: 2;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-all;
+            text-align: center;
+        }
+
+        .display-info {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #aaa;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        /* Control Section */
+        .control-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 30px;
+            background: rgba(10, 14, 39, 0.8);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .control-title {
+            font-size: 1.2em;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 20px 10px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 153, 204, 0.2) 100%);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: var(--transition);
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn.operator {
+            grid-column: span 1;
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.2) 0%, rgba(255, 85, 0, 0.2) 100%);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .btn.operator:hover {
+            background: linear-gradient(135deg, var(--warning) 0%, #ff5500 100%);
+            color: #000;
+            box-shadow: 0 0 30px rgba(255, 170, 0, 0.6);
+        }
+
+        .btn.equals {
+            grid-column: span 2;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 100, 0.2) 100%);
+            border-color: var(--success);
+            color: var(--success);
+            font-size: 1.5em;
+        }
+
+        .btn.equals:hover {
+            background: linear-gradient(135deg, var(--success) 0%, #00c864 100%);
+            color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+        }
+
+        .btn.clear {
+            grid-column: span 4;
+            background: linear-gradient(135deg, rgba(255, 0, 85, 0.2) 0%, rgba(204, 0, 51, 0.2) 100%);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn.clear:hover {
+            background: linear-gradient(135deg, var(--danger) 0%, #cc0033 100%);
+            color: #fff;
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.6);
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card-label {
+            font-size: 0.75em;
+            color: #aaa;
+            text-transform: uppercase;
             margin-bottom: 5px;
         }
-        
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-        
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
+
+        .stat-card-value {
+            font-size: 1.3em;
+            color: var(--success);
             font-weight: bold;
         }
-        
-        .btn-blue {
-            background: #1e3c72;
-            color: white;
-        }
-        
-        .btn-blue:hover {
-            background: #2a5298;
-            box-shadow: 0 5px 15px rgba(30, 60, 114, 0.3);
-        }
-        
-        .btn-success {
-            background: #4caf50;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #45a049;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
-        }
-        
-        .status {
-            background: #c8e6c9;
-            color: #2e7d32;
+
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid var(--primary);
             padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
             text-align: center;
-            font-weight: bold;
+            font-size: 0.85em;
+            color: #aaa;
         }
-        
-        .screen-footer {
-            background: #f0f0f0;
-            padding: 20px;
-            text-align: center;
-            color: #666;
-            border-top: 1px solid #ddd;
+
+        .memory-display {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid var(--primary);
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #aaa;
         }
-        
-        @media (max-width: 600px) {
-            .screen-header h1 {
-                font-size: 1.8em;
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
             }
             
-            .stats {
+            .button-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .main-display {
+                font-size: 3em;
+            }
+
+            .button-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
-            .action-buttons {
-                flex-direction: column;
+
+            .btn.equals {
+                grid-column: span 2;
             }
-            
-            button {
-                width: 100%;
+
+            .btn.clear {
+                grid-column: span 2;
             }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1e3f 0%, #0a0e27 100%);
+            margin: 5% auto;
+            padding: 30px;
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.3);
+        }
+
+        .modal-close {
+            color: var(--primary);
+            float: right;
+            font-size: 1.8em;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            color: var(--warning);
         }
     </style>
 </head>
 <body>
-    <div class="screen">
-        <div class="screen-header">
-            <h1>Screen Content Display</h1>
-            <p>No API Keys • No Authentication • Pure HTML/CSS/JavaScript</p>
-        </div>
-        
-        <div class="screen-content">
-            <div class="section">
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="stat-number" id="visitCount">0</div>
-                        <div class="stat-label">Page Loads</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number" id="clockDisplay">--:--</div>
-                        <div class="stat-label">Current Time</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-number" id="statusCount">∞</div>
-                        <div class="stat-label">Features</div>
-                    </div>
-                </div>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">🔢 ADVANCED NUMERIC SYSTEM</div>
+        <div class="header-info">
+            <div class="header-stat">
+                <div class="stat-indicator"></div>
+                <span id="headerTime">00:00:00</span>
             </div>
-            
-            <div class="section">
-                <h2>Display Information</h2>
-                <div class="card">
-                    <h3>✓ HTTPS Compatible</h3>
-                    <p>This page runs seamlessly on HTTPS servers without requiring any SSL certificates configuration or security certificates.</p>
-                </div>
-                <div class="card">
-                    <h3>✓ No API Keys Needed</h3>
-                    <p>Completely standalone page that doesn't require any external APIs, authentication tokens, or secret keys.</p>
-                </div>
-                <div class="card">
-                    <h3>✓ Responsive Design</h3>
-                    <p>Automatically adapts to any screen size - desktop, tablet, or mobile devices.</p>
-                </div>
-                <div class="card">
-                    <h3>✓ Fast & Lightweight</h3>
-                    <p>Optimized pure HTML, CSS, and JavaScript with no external dependencies or heavy libraries.</p>
-                </div>
+            <div class="header-stat">
+                Ver: 2.0 | HTTPS | No API
             </div>
-            
-            <div class="section">
-                <h2>Quick Actions</h2>
-                <div class="action-buttons">
-                    <button class="btn-blue" onclick="incrementCounter()">Increment Counter</button>
-                    <button class="btn-success" onclick="showMessage()">Show Message</button>
-                </div>
-                <div class="status" id="messageBox" style="display: none; margin-top: 15px;">
-                    ✓ Status: Page is running successfully on HTTPS without any API keys!
-                </div>
-            </div>
-        </div>
-        
-        <div class="screen-footer">
-            <p>© 2026 Screen Display • Running Locally • No External Services</p>
         </div>
     </div>
-    
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Display Section -->
+        <div class="display-section">
+            <div class="display-label">Display Output</div>
+            <div class="main-display" id="mainDisplay">0</div>
+            <div class="display-info" id="displayInfo">Ready for input</div>
+            <div class="memory-display" id="memoryDisplay">MEM: 0 | Ops: 0</div>
+        </div>
+
+        <!-- Control Section -->
+        <div class="control-section">
+            <div class="control-title">📱 Calculator</div>
+            
+            <div class="button-grid">
+                <!-- Row 1 -->
+                <button class="btn" onclick="appendNumber('7')">7</button>
+                <button class="btn" onclick="appendNumber('8')">8</button>
+                <button class="btn" onclick="appendNumber('9')">9</button>
+                <button class="btn operator" onclick="setOperation('/')">÷</button>
+
+                <!-- Row 2 -->
+                <button class="btn" onclick="appendNumber('4')">4</button>
+                <button class="btn" onclick="appendNumber('5')">5</button>
+                <button class="btn" onclick="appendNumber('6')">6</button>
+                <button class="btn operator" onclick="setOperation('*')">×</button>
+
+                <!-- Row 3 -->
+                <button class="btn" onclick="appendNumber('1')">1</button>
+                <button class="btn" onclick="appendNumber('2')">2</button>
+                <button class="btn" onclick="appendNumber('3')">3</button>
+                <button class="btn operator" onclick="setOperation('-')">−</button>
+
+                <!-- Row 4 -->
+                <button class="btn" onclick="appendNumber('0')">0</button>
+                <button class="btn" onclick="appendNumber('.')">.</button>
+                <button class="btn operator" onclick="setOperation('+')">+</button>
+                <button class="btn" onclick="toggleSign()">±</button>
+
+                <!-- Row 5 -->
+                <button class="btn equals" onclick="calculate()">=</button>
+                <button class="btn" onclick="backspace()">⌫ Back</button>
+
+                <!-- Row 6 -->
+                <button class="btn clear" onclick="clearDisplay()">CLEAR ALL</button>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-card-label">Operations</div>
+                    <div class="stat-card-value" id="operationCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Memory</div>
+                    <div class="stat-card-value" id="memoryValue">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">History</div>
+                    <div class="stat-card-value" id="historyCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-label">Session</div>
+                    <div class="stat-card-value" id="sessionCount">00:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <span>⚡ Real-time Processing | 🔒 HTTPS Secure | 📊 Advanced Calculation | ⌚ Session Active</span>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h2 style="color: var(--primary); margin-bottom: 15px;">System Information</h2>
+            <p style="color: #aaa; line-height: 1.6;">
+                <strong>Advanced Numeric Display System v2.0</strong><br><br>
+                Features:<br>
+                • Real-time calculation<br>
+                • Memory storage<br>
+                • Operation tracking<br>
+                • HTTPS encrypted connection<br>
+                • No external API keys required<br>
+                • Keyboard support (Numbers, Operators, Enter, Backspace)<br>
+            </p>
+        </div>
+    </div>
+
     <script>
-        let counter = parseInt(localStorage.getItem('visitCount')) || 0;
-        
-        function updateClock() {
+        // Calculator State
+        let display = '0';
+        let previous = '';
+        let operation = null;
+        let operationCount = 0;
+        let memory = 0;
+        let history = [];
+        let sessionStart = Date.now();
+
+        function updateDisplay() {
+            document.getElementById('mainDisplay').textContent = display;
+            document.getElementById('displayInfo').textContent = 
+                operation ? `Operation: ${operation}` : 'Ready for input';
+            document.getElementById('operationCount').textContent = operationCount;
+            document.getElementById('memoryValue').textContent = memory;
+            document.getElementById('historyCount').textContent = history.length;
+            document.getElementById('memoryDisplay').textContent = 
+                `MEM: ${memory} | Ops: ${operationCount} | History: ${history.length}`;
+        }
+
+        function appendNumber(num) {
+            if (display === '0' && num !== '.') {
+                display = num;
+            } else if (num === '.' && display.includes('.')) {
+                return;
+            } else {
+                display += num;
+            }
+            updateDisplay();
+        }
+
+        function setOperation(op) {
+            if (display === '') return;
+            
+            if (previous !== '') {
+                calculate();
+            }
+            
+            operation = op;
+            previous = display;
+            display = '';
+            operationCount++;
+            updateDisplay();
+        }
+
+        function calculate() {
+            if (!operation || display === '') return;
+            
+            let result;
+            const prev = parseFloat(previous);
+            const curr = parseFloat(display);
+
+            switch(operation) {
+                case '+': result = prev + curr; break;
+                case '-': result = prev - curr; break;
+                case '*': result = prev * curr; break;
+                case '/': result = curr !== 0 ? prev / curr : 0; break;
+                default: return;
+            }
+
+            history.push(`${prev} ${operation} ${curr} = ${result}`);
+            display = String(result);
+            operation = null;
+            previous = '';
+            updateDisplay();
+        }
+
+        function clearDisplay() {
+            display = '0';
+            previous = '';
+            operation = null;
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (display.length > 1) {
+                display = display.slice(0, -1);
+            } else {
+                display = '0';
+            }
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            display = String(parseFloat(display) * -1);
+            updateDisplay();
+        }
+
+        function closeModal() {
+            document.getElementById('infoModal').style.display = 'none';
+        }
+
+        // Update Header Time
+        function updateHeaderTime() {
             const now = new Date();
-            document.getElementById('clockDisplay').textContent = 
-                String(now.getHours()).padStart(2, '0') + ':' + 
-                String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('headerTime').textContent = now.toLocaleTimeString();
+            
+            const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('sessionCount').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
-        
-        function incrementCounter() {
-            counter++;
-            localStorage.setItem('visitCount', counter);
-            document.getElementById('visitCount').textContent = counter;
-        }
-        
-        function showMessage() {
-            const msgBox = document.getElementById('messageBox');
-            msgBox.style.display = msgBox.style.display === 'none' ? 'block' : 'none';
-        }
-        
+
+        // Keyboard Support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+            if (e.key === '.') appendNumber('.');
+            if (e.key === '+') setOperation('+');
+            if (e.key === '-') setOperation('-');
+            if (e.key === '*') setOperation('*');
+            if (e.key === '/') { e.preventDefault(); setOperation('/'); }
+            if (e.key === 'Enter') calculate();
+            if (e.key === 'Backspace') backspace();
+            if (e.key === 'Escape') clearDisplay();
+        });
+
         // Initialize
-        document.getElementById('visitCount').textContent = counter;
-        updateClock();
-        setInterval(updateClock, 1000);
+        updateDisplay();
+        updateHeaderTime();
+        setInterval(updateHeaderTime, 1000);
     </script>
 </body>
 </html>
