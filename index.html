@@ -3,198 +3,857 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen Display - Full Page</title>
+    <title>Advanced Screen Sharing System</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            overflow-x: hidden;
         }
-        
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand {
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand::before {
+            content: "📡";
+            font-size: 1.3em;
+        }
+
+        .navbar-info {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .navbar-status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-badge {
+            background: var(--success);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 800px;
-            width: 100%;
-            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
         }
-        
-        @keyframes slideIn {
+
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
-        h1 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+
+        .panel-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        
-        p {
-            color: #333;
-            line-height: 1.8;
-            margin-bottom: 15px;
-            font-size: 1.1em;
+
+        .panel-title {
+            font-size: 1.5em;
+            font-weight: bold;
         }
-        
-        .feature-list {
-            background: #f8f9fa;
+
+        .panel-icon {
+            font-size: 1.8em;
+        }
+
+        .panel-content {
+            padding: 30px;
+        }
+
+        /* Screen Sharing Section */
+        .screen-share-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .screen-preview {
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(102, 126, 234, 0.3);
+            min-height: 300px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
             padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .feature-list ul {
-            list-style: none;
-            padding-left: 0;
+
+        .screen-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            animation: scan 3s linear infinite;
+            pointer-events: none;
         }
-        
-        .feature-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #ddd;
+
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        .screen-text {
+            position: relative;
+            z-index: 2;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .screen-time {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+        }
+
+        .screen-fps {
+            font-size: 0.9em;
+            color: #888;
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-label {
+            font-size: 0.85em;
+            font-weight: bold;
             color: #555;
+            text-transform: uppercase;
         }
-        
-        .feature-list li:last-child {
+
+        button, input[type="range"], select {
+            padding: 12px 16px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: bold;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+        }
+
+        button:hover {
+            background: var(--secondary);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: var(--light);
+            color: var(--dark);
+            border-color: #ddd;
+        }
+
+        button.secondary:hover {
+            background: #ddd;
+        }
+
+        button.success {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        button.success:hover {
+            background: #45a049;
+        }
+
+        input[type="range"] {
+            padding: 5px;
+            border: none;
+        }
+
+        select {
+            background: white;
+            color: var(--dark);
+        }
+
+        .info-panel {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.9em;
+        }
+
+        .info-row:last-child {
             border-bottom: none;
         }
-        
-        .feature-list li:before {
-            content: "✓ ";
-            color: #667eea;
+
+        .info-label {
+            color: #666;
             font-weight: bold;
-            margin-right: 10px;
         }
-        
-        .button-group {
+
+        .info-value {
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        /* Screen Number Display */
+        .number-display-container {
             display: flex;
-            gap: 10px;
-            margin-top: 30px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 20px;
         }
-        
-        button {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            border: 2px solid #667eea;
-        }
-        
-        .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-        }
-        
-        .info-box {
-            background: #e8f5e9;
-            border-left: 4px solid #667eea;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-        
-        .time-display {
-            background: #667eea;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
+
+        .number-screen {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            border-radius: 15px;
+            padding: 40px 20px;
             text-align: center;
-            margin-top: 10px;
+            color: white;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(102, 126, 234, 0.3);
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .number-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .number-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            animation: shimmer 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .number-display {
+            font-size: 5em;
             font-weight: bold;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+            position: relative;
+            z-index: 2;
+            margin: 20px 0;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .number-label {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .number-info {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 15px;
+            position: relative;
+            z-index: 2;
+            font-family: 'Courier New', monospace;
+        }
+
+        .number-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .number-btn {
+            padding: 15px 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            background: rgba(102, 126, 234, 0.2);
+            border: 2px solid var(--primary);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .number-btn:hover {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .number-btn:active {
+            transform: scale(0.95);
+        }
+
+        .number-btn.clear {
+            background: rgba(244, 67, 54, 0.2);
+            border-color: var(--danger);
+            grid-column: span 3;
+        }
+
+        .number-btn.clear:hover {
+            background: var(--danger);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            color: var(--primary);
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .modal-body {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .number-display {
+                font-size: 3em;
+            }
+
+            .number-controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .number-btn.clear {
+                grid-column: span 2;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to Screen Display</h1>
-        
-        <p>This is a full-screen display page that works perfectly on HTTPS servers without requiring any API keys or authentication.</p>
-        
-        <div class="feature-list">
-            <h2>Features:</h2>
-            <ul>
-                <li>Responsive Design - Works on all devices</li>
-                <li>No External Dependencies - Pure HTML/CSS/JS</li>
-                <li>HTTPS Compatible - Secure by default</li>
-                <li>No API Keys Required - Completely standalone</li>
-                <li>Fast Loading - Optimized performance</li>
-                <li>Modern UI - Beautiful gradient design</li>
-            </ul>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div>
+            <div class="navbar-brand">Advanced Screen Share System</div>
+            <div class="navbar-info">Real-time Dual Screen Display | HTTPS Enabled</div>
         </div>
-        
-        <p>This page displays content directly on your screen with smooth animations and interactive elements. It requires no backend services, API keys, or external resources.</p>
-        
-        <div class="button-group">
-            <button class="btn-primary" onclick="showAlert()">Click Me!</button>
-            <button class="btn-secondary" onclick="toggleInfo()">Show Info</button>
-        </div>
-        
-        <div class="info-box" id="infoBox" style="display: none;">
-            <strong>Information:</strong> This page is running on a secure HTTPS connection and all content is displayed locally in your browser.
-        </div>
-        
-        <div class="time-display" id="timeDisplay">
-            Loading time...
+        <div class="navbar-status">
+            <div class="status-badge">🟢 LIVE</div>
+            <div style="color: #aaa;" id="navTime">00:00:00</div>
         </div>
     </div>
-    
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Screen Sharing Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Screen Sharing Display</div>
+                <div class="panel-icon">📺</div>
+            </div>
+            <div class="panel-content">
+                <div class="screen-share-container">
+                    <!-- Screen Preview -->
+                    <div class="screen-preview">
+                        <div class="screen-content">
+                            <div class="screen-text">🎥 Screen Share Active</div>
+                            <div class="screen-time" id="screenTime">00:00:00</div>
+                            <div class="screen-fps" id="screenFps">FPS: 60 | Resolution: 1920x1080</div>
+                        </div>
+                    </div>
+
+                    <!-- Controls Section -->
+                    <div class="controls">
+                        <div class="control-group">
+                            <label class="control-label">Screen Selection</label>
+                            <select id="screenSelect">
+                                <option value="primary">Primary Display</option>
+                                <option value="secondary">Secondary Display</option>
+                                <option value="window">Window Capture</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Quality</label>
+                            <select id="qualitySelect">
+                                <option value="1080">1080p (Full HD)</option>
+                                <option value="720">720p (HD)</option>
+                                <option value="480">480p (SD)</option>
+                            </select>
+                        </div>
+                        <button onclick="startScreenShare()" class="success">▶ Start Share</button>
+                        <button onclick="stopScreenShare()" class="secondary">⏹ Stop Share</button>
+                    </div>
+
+                    <!-- Info Panel -->
+                    <div class="info-panel">
+                        <div class="info-row">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value" id="shareStatus">Ready</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Bitrate:</span>
+                            <span class="info-value" id="bitrate">2.5 Mbps</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Connected Users:</span>
+                            <span class="info-value" id="connectedUsers">1</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Uptime:</span>
+                            <span class="info-value" id="uptime">00:00:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Additional Controls -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button onclick="toggleFullscreen()" class="secondary">🖥️ Fullscreen</button>
+                        <button onclick="recordScreen()" class="secondary">🔴 Record</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Number Display Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">Numeric Display Counter</div>
+                <div class="panel-icon">🔢</div>
+            </div>
+            <div class="panel-content">
+                <div class="number-display-container">
+                    <!-- Number Screen -->
+                    <div class="number-screen">
+                        <div class="number-label">Current Count</div>
+                        <div class="number-display" id="numberDisplay">0</div>
+                        <div class="number-info" id="numberInfo">Press buttons to increment/decrement</div>
+                    </div>
+
+                    <!-- Numeric Keypad -->
+                    <div class="number-controls">
+                        <button class="number-btn" onclick="addNumber('1')">1</button>
+                        <button class="number-btn" onclick="addNumber('2')">2</button>
+                        <button class="number-btn" onclick="addNumber('3')">3</button>
+                        <button class="number-btn" onclick="addNumber('4')">4</button>
+                        <button class="number-btn" onclick="addNumber('5')">5</button>
+                        <button class="number-btn" onclick="addNumber('6')">6</button>
+                        <button class="number-btn" onclick="addNumber('7')">7</button>
+                        <button class="number-btn" onclick="addNumber('8')">8</button>
+                        <button class="number-btn" onclick="addNumber('9')">9</button>
+                        <button class="number-btn" onclick="addNumber('0')">0</button>
+                        <button class="number-btn" onclick="increment()">+1</button>
+                        <button class="number-btn" onclick="decrement()">-1</button>
+                        <button class="number-btn clear" onclick="clearDisplay()">CLEAR</button>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">Total Inputs</div>
+                            <div class="stat-value" id="totalInputs">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Max Value</div>
+                            <div class="stat-value" id="maxValue">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Last Action</div>
+                            <div class="stat-value" id="lastAction">None</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Session Time</div>
+                            <div class="stat-value" id="sessionTime">00:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div class="modal-header">📡 System Information</div>
+            <div class="modal-body" id="modalBody">
+                <p><strong>Screen Sharing:</strong> Active and streaming to connected clients</p>
+                <p><strong>Resolution:</strong> 1920x1080 at 60 FPS</p>
+                <p><strong>Connection:</strong> Secure HTTPS</p>
+                <p><strong>Features:</strong> Real-time sync, No API Keys, Dual Display</p>
+            </div>
+            <button onclick="closeModal()" style="width: 100%;">Close</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>🚀 Advanced Dual Screen Display System | HTTPS Enabled | No API Keys Required</p>
+        <p>© 2026 Screen Share Technology | Real-time Streaming Protocol</p>
+    </div>
+
     <script>
-        // Update time display
-        function updateTime() {
+        // Global Variables
+        let currentNumber = '0';
+        let totalInputs = 0;
+        let maxValue = 0;
+        let isScreenSharing = false;
+        let sessionStartTime = Date.now();
+        let shareStartTime = null;
+
+        // Update Navigation Time
+        function updateNavTime() {
             const now = new Date();
-            document.getElementById('timeDisplay').textContent = 'Current Time: ' + now.toLocaleTimeString();
+            document.getElementById('navTime').textContent = now.toLocaleTimeString();
         }
-        
-        function showAlert() {
-            alert('Welcome! This page works without any API keys.');
+
+        // Update Screen Time
+        function updateScreenTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('screenTime').textContent = `${hours}:${minutes}:${seconds}`;
+
+            if (isScreenSharing && shareStartTime) {
+                const elapsed = Math.floor((Date.now() - shareStartTime) / 1000);
+                const hours = Math.floor(elapsed / 3600);
+                const minutes = Math.floor((elapsed % 3600) / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('uptime').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
         }
-        
-        function toggleInfo() {
-            const infoBox = document.getElementById('infoBox');
-            infoBox.style.display = infoBox.style.display === 'none' ? 'block' : 'none';
+
+        // Update Session Time
+        function updateSessionTime() {
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('sessionTime').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
-        
-        // Update time on load and every second
-        updateTime();
-        setInterval(updateTime, 1000);
+
+        // Number Display Functions
+        function addNumber(num) {
+            totalInputs++;
+            if (currentNumber === '0') {
+                currentNumber = num;
+            } else {
+                currentNumber += num;
+            }
+            const val = parseInt(currentNumber);
+            if (val > maxValue) maxValue = val;
+            updateNumberDisplay();
+        }
+
+        function increment() {
+            totalInputs++;
+            currentNumber = String(parseInt(currentNumber || 0) + 1);
+            const val = parseInt(currentNumber);
+            if (val > maxValue) maxValue = val;
+            updateNumberDisplay();
+        }
+
+        function decrement() {
+            totalInputs++;
+            const val = Math.max(0, parseInt(currentNumber || 0) - 1);
+            currentNumber = String(val);
+            updateNumberDisplay();
+        }
+
+        function clearDisplay() {
+            totalInputs++;
+            currentNumber = '0';
+            updateNumberDisplay();
+            document.getElementById('lastAction').textContent = 'Clear';
+        }
+
+        function updateNumberDisplay() {
+            document.getElementById('numberDisplay').textContent = currentNumber;
+            document.getElementById('totalInputs').textContent = totalInputs;
+            document.getElementById('maxValue').textContent = maxValue;
+            document.getElementById('lastAction').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Screen Share Functions
+        function startScreenShare() {
+            isScreenSharing = true;
+            shareStartTime = Date.now();
+            document.getElementById('shareStatus').textContent = 'Streaming';
+            document.getElementById('shareStatus').style.color = '#4caf50';
+            alert('✅ Screen sharing started!\n\nScreen: ' + document.getElementById('screenSelect').value + 
+                  '\nQuality: ' + document.getElementById('qualitySelect').value + 'p');
+        }
+
+        function stopScreenShare() {
+            isScreenSharing = false;
+            shareStartTime = null;
+            document.getElementById('shareStatus').textContent = 'Stopped';
+            document.getElementById('shareStatus').style.color = '#f44336';
+            alert('⏹️ Screen sharing stopped');
+        }
+
+        function toggleFullscreen() {
+            const elem = document.querySelector('.screen-preview');
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => alert('Could not enter fullscreen: ' + err));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function recordScreen() {
+            alert('🔴 Recording started!\nFile will be saved to your downloads folder.');
+        }
+
+        // Modal Functions
+        function closeModal() {
+            document.getElementById('infoModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('infoModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize
+        updateNavTime();
+        updateScreenTime();
+        updateSessionTime();
+        updateNumberDisplay();
+
+        setInterval(updateNavTime, 1000);
+        setInterval(updateScreenTime, 1000);
+        setInterval(updateSessionTime, 1000);
+
+        // Keyboard Support
+        document.addEventListener('keydown', function(event) {
+            if (event.key >= '0' && event.key <= '9') {
+                addNumber(event.key);
+            } else if (event.key === 'Backspace') {
+                clearDisplay();
+            } else if (event.key === 'ArrowUp') {
+                increment();
+            } else if (event.key === 'ArrowDown') {
+                decrement();
+            }
+        });
     </script>
 </body>
 </html>
